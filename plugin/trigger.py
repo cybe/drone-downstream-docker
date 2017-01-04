@@ -41,8 +41,8 @@ class TriggerPlugin(object):
     def get_branches_of_repos_with_dockerfile(self, branches_of_repos: BranchesOfRepos, from_: str) -> BranchesOfRepos:
         branches_of_repos_with_dockerfile = {}  # type: BranchesOfRepos
         for repo, branches in branches_of_repos.items():
-            branches_with_dockerfiles = filter(
-                lambda branch: self.searcher.has_matching_from_instruction(repo, branch, from_), branches)
+            branches_with_dockerfiles = [branch for branch in branches if
+                                         self.searcher.has_matching_from_instruction(repo, branch, from_)]
             if branches_with_dockerfiles:
                 branches_of_repos_with_dockerfile[repo] = branches_with_dockerfiles
         return branches_of_repos_with_dockerfile
