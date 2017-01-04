@@ -41,9 +41,10 @@ class TriggerPlugin(object):
     def get_branches_of_repos_with_dockerfile(self, branches_of_repos: BranchesOfRepos, from_: str) -> BranchesOfRepos:
         branches_of_repos_with_dockerfile = {}  # type: BranchesOfRepos
         for repo, branches in branches_of_repos.items():
-            branches = filter(lambda branch: self.searcher.has_matching_from_instruction(repo, branch, from_), branches)
-            if branches:
-                branches_of_repos_with_dockerfile[repo] = branches
+            branches_with_dockerfiles = filter(
+                lambda branch: self.searcher.has_matching_from_instruction(repo, branch, from_), branches)
+            if branches_with_dockerfiles:
+                branches_of_repos_with_dockerfile[repo] = branches_with_dockerfiles
         return branches_of_repos_with_dockerfile
 
     def create_build_triggers(self, branches_of_repos_with_dockerfile: BranchesOfRepos) -> BuildTriggers:
@@ -67,7 +68,7 @@ def main() -> None:
     gogs = GogsClient(requester, config.gogs_api, config.gogs_token)
 
     trigger = TriggerPlugin(drone, gogs, DockerImageSearcher(gogs))
-    trigger.run(config.image, Repo.from_full_name(config.source))
+    trigger.run(config.from_, Repo.from_full_name(config.source))
 
 
 if __name__ == "__main__":

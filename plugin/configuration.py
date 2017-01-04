@@ -6,14 +6,14 @@ from typing import NamedTuple
 
 class Config(NamedTuple("Config",
                         [("drone_api", str), ("drone_token", str), ("gogs_api", str), ("gogs_token", str),
-                         ("image", str), ("source", str)])):
+                         ("from_", str), ("source", str)])):
     PREFIX_YAML = "PLUGIN_"
     PREFIX_ENCRYPTED = "TRIGGER_"
     DRONE_API = "DRONE_API"
     DRONE_TOKEN = "DRONE_TOKEN"
     GOGS_API = "GOGS_API"
     GOGS_TOKEN = "GOGS_TOKEN"
-    IMAGE = "IMAGE"
+    FROM = "FROM"
     SOURCE = "DRONE_REPO"
 
     @classmethod
@@ -25,10 +25,10 @@ class Config(NamedTuple("Config",
         drone_token = get_either_from_yaml_or_from_secret_store(Config.DRONE_TOKEN)
         gogs_api = get_either_from_yaml_or_from_secret_store(Config.GOGS_API)
         gogs_token = get_either_from_yaml_or_from_secret_store(Config.GOGS_TOKEN)
-        image = get_either_from_yaml_or_from_secret_store(Config.IMAGE)
+        from_ = get_either_from_yaml_or_from_secret_store(Config.FROM)
         source = os.getenv(Config.SOURCE)
 
-        return cls(drone_api, drone_token, gogs_api, gogs_token, image, source)
+        return cls(drone_api, drone_token, gogs_api, gogs_token, from_, source)
 
 
 def validate(config: Config) -> None:
@@ -44,7 +44,7 @@ def validate(config: Config) -> None:
     validate_value(config.gogs_token, Config.GOGS_TOKEN, mandatory=False,
                    additional_message="Without the token, API calls to gogs won't be authenticated.")
 
-    validate_value(config.image, Config.IMAGE, mandatory=True)
+    validate_value(config.from_, Config.FROM, mandatory=True)
 
     validate_drone_value(config.source, Config.SOURCE)
 
