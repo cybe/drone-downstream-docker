@@ -35,11 +35,12 @@ class GogsClient(Client):
 
     @staticmethod
     def parse_hook_token(doc: Json) -> str:
-        for hook in doc:
-            if hook["type"] == "gogs" and "push" in hook["events"]:
-                url = hook["config"]["url"]
-                query = urllib.parse.urlparse(url).query
-                return urllib.parse.parse_qs(query)["access_token"][0]
+        hooks = list(filter(lambda hook: hook["type"] == "gogs" and "push" in hook["events"], doc))
+        if hooks:
+            hooks = sorted(hooks, key=lambda hook: hook["id"], reverse=True)
+            url = hooks[0]["config"]["url"]
+            query = urllib.parse.urlparse(url).query
+            return urllib.parse.parse_qs(query)["access_token"][0]
         else:
             raise UnableToFindDroneHookException("No Drone hook configured.")
 
