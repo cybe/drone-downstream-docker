@@ -41,12 +41,12 @@ class DroneClient(Client):
             doc = self.request_json("/user/repos")
             return (Repo(r["owner"], r["name"]) for r in doc)
         except ClientException as e:
-            l.error("Unable to retrieve Drone repos: %s", e)
+            l.error("Unable to retrieve Drone repositories: %s", e)
             raise SystemExit(1)
 
     @staticmethod
     def unable_to_trigger(e: ClientException, repo_full_name: str) -> None:
-        not_triggered_message = "Unable to build for repo {}".format(repo_full_name)
+        not_triggered_message = "Unable to trigger build for {}".format(repo_full_name)
         if e.getcode() == 400:
             l.error("%s: The supplied token is invalid.", not_triggered_message)
         elif e.getcode() == 401:
@@ -60,7 +60,7 @@ class DroneClient(Client):
                                 source=source.full_name)
         try:
             doc = self.request_json("/hook", json.dumps(hook_data).encode())
-            l.info("Triggered build #%s for repo %s on branch %s", doc["number"], repo.full_name, branch.name)
+            l.info("Triggered build #%s for %s on branch %s", doc["number"], repo.full_name, branch.name)
         except ClientException as e:
             self.unable_to_trigger(e, repo.full_name)
 

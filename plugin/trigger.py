@@ -20,11 +20,12 @@ class TriggerPlugin(object):
         self.searcher = searcher
 
     def run(self, from_: str, source: Repo) -> None:
-        l.info("Triggering builds of Docker repos with FROM directive %s", from_)
+        l.info("Triggering builds of Docker repositories with FROM directive '%s'", from_)
         repos = self.drone.retrieve_repos()
         branches_of_repos = self.get_branches_of_repos(repos)
         branches_of_repos_with_dockerfile = self.get_branches_of_repos_with_dockerfile(branches_of_repos, from_)
         build_triggers = self.create_build_triggers(branches_of_repos_with_dockerfile)
+        self.log_triggered_builds(build_triggers)
         self.drone.trigger_builds(build_triggers, source)
 
     def get_branches_of_repos(self, repos: Repos) -> BranchesOfRepos:
@@ -35,7 +36,7 @@ class TriggerPlugin(object):
                 if branches_of_repo:
                     branches_of_repos[repo] = branches_of_repo
             except ClientException as e:
-                l.warning("Ignoring repository %s, its branches could not be retrieved: %s", repo.full_name, e)
+                l.warning("Ignoring %s, its branches could not be retrieved: %s", repo.full_name, e)
         return branches_of_repos
 
     def get_branches_of_repos_with_dockerfile(self, branches_of_repos: BranchesOfRepos, from_: str) -> BranchesOfRepos:
@@ -56,6 +57,16 @@ class TriggerPlugin(object):
             except ClientException as e:
                 l.error("Not triggering build for %s: %s", repo.full_name, e)
         return build_triggers
+
+    @staticmethod
+    def log_triggered_builds(triggers: BuildTriggers) -> None:
+        builds = []
+        for repo, trigger in triggers.items():
+            builds.append("{}[{}]".format(repo.full_name, ",".join(b.name for b in trigger.branches)))
+        if builds:
+            l.info("Triggering builds for: %s", "; ".join(builds))
+        else:
+            l.info("There are no builds to trigger.")
 
 
 def main() -> None:
