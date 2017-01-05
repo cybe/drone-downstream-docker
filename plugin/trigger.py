@@ -19,14 +19,17 @@ class TriggerPlugin(object):
         self.gogs = gogs
         self.searcher = searcher
 
-    def run(self, from_: str, source: Repo) -> None:
-        l.info("Triggering builds of Docker repositories with FROM directive '%s'", from_)
+    def run(self, from_: str, source: Repo, dry_run: bool) -> None:
+        l.info("Triggering builds of Docker repositories with FROM instruction '%s'", from_)
         repos = self.drone.retrieve_repos()
         branches_of_repos = self.get_branches_of_repos(repos)
         branches_of_repos_with_dockerfile = self.get_branches_of_repos_with_dockerfile(branches_of_repos, from_)
         build_triggers = self.create_build_triggers(branches_of_repos_with_dockerfile)
         self.log_triggered_builds(build_triggers)
-        self.drone.trigger_builds(build_triggers, source)
+        if dry_run:
+            l.info("Aborted execution, this was only a dry run.")
+        else:
+            self.drone.trigger_builds(build_triggers, source)
 
     def get_branches_of_repos(self, repos: Repos) -> BranchesOfRepos:
         branches_of_repos = {}  # type: BranchesOfRepos
@@ -79,7 +82,7 @@ def main() -> None:
     gogs = GogsClient(requester, config.gogs_api, config.gogs_token)
 
     trigger = TriggerPlugin(drone, gogs, DockerImageSearcher(gogs))
-    trigger.run(config.from_, Repo.from_full_name(config.source))
+    trigger.run(config.from_, Repo.from_full_name(config.source), config.dry_run)
 
 
 if __name__ == "__main__":

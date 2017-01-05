@@ -6,7 +6,7 @@ from typing import NamedTuple
 
 class Config(NamedTuple("Config",
                         [("drone_api", str), ("drone_token", str), ("gogs_api", str), ("gogs_token", str),
-                         ("from_", str), ("source", str)])):
+                         ("from_", str), ("source", str), ("dry_run", str)])):
     PREFIX_YAML = "PLUGIN_"
     PREFIX_ENCRYPTED = "TRIGGER_"
     DRONE_API = "DRONE_API"
@@ -15,6 +15,7 @@ class Config(NamedTuple("Config",
     GOGS_TOKEN = "GOGS_TOKEN"
     FROM = "FROM"
     SOURCE = "DRONE_REPO"
+    DRY_RUN = "DRY_RUN"
 
     @classmethod
     def create_from_env(cls) -> "Config":
@@ -27,8 +28,9 @@ class Config(NamedTuple("Config",
         gogs_token = get_either_from_yaml_or_from_secret_store(Config.GOGS_TOKEN)
         from_ = get_either_from_yaml_or_from_secret_store(Config.FROM)
         source = os.getenv(Config.SOURCE)
+        dry_run = str(get_either_from_yaml_or_from_secret_store(Config.DRY_RUN)).lower() in ("true", "yes")
 
-        return cls(drone_api, drone_token, gogs_api, gogs_token, from_, source)
+        return cls(drone_api, drone_token, gogs_api, gogs_token, from_, source, dry_run)
 
 
 def validate(config: Config) -> None:
