@@ -39,7 +39,7 @@ class DroneClient(Client):
     def retrieve_repos(self) -> Repos:
         try:
             doc = self.request_json("/user/repos")
-            return (Repo(r["owner"], r["name"]) for r in doc)
+            return [Repo(r["owner"], r["name"]) for r in doc]
         except ClientException as e:
             l.error("Unable to retrieve Drone repositories: %s", e)
             raise SystemExit(1)
@@ -54,23 +54,27 @@ class DroneClient(Client):
         else:
             l.error("%s: %s", not_triggered_message, e)
 
-    def trigger_branch_build(self, repo: Repo, branch: Branch, source: Repo) -> None:
+    def trigger_branch_build(self, repo: Repo, branch: Branch, source: Repo) -> int:
         hook_data = json_format(DroneClient.TRIGGER_TEMPLATE,
                                 owner=repo.owner, name=repo.name, branch=branch.name, commit=branch.sha1,
                                 source=source.full_name)
         try:
             doc = self.request_json("/hook", json.dumps(hook_data).encode())
-            l.info("Triggered build #%s for %s on branch %s", doc["number"], repo.full_name, branch.name)
+            l.debug("Triggered build #%s for %s on branch %s", doc["number"], repo.full_name, branch.name)
+            return 1
         except ClientException as e:
             self.unable_to_trigger(e, repo.full_name)
+            return 0
 
-    def trigger_builds(self, triggers: BuildTriggers, source: Repo) -> None:
+    def trigger_builds(self, triggers: BuildTriggers, source: Repo) -> int:
         self.add_header("Content-Type", "application/json; charset=utf-8")
         self.add_header("X-Gogs-Event", "push")
+        builds_triggered = 0
         for repo, trigger in triggers.items():
             self.add_header("Authorization", trigger.token)
             for branch in trigger.branches:
-                self.trigger_branch_build(repo, branch, source)
+                builds_triggered += self.trigger_branch_build(repo, branch, source)
+        return builds_triggered
 
 
 def json_format(original: Json, **kwargs: Union[str, Dict]) -> Json:

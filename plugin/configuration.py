@@ -6,7 +6,7 @@ from typing import NamedTuple
 
 class Config(NamedTuple("Config",
                         [("drone_api", str), ("drone_token", str), ("gogs_api", str), ("gogs_token", str),
-                         ("from_", str), ("source", str), ("dry_run", str)])):
+                         ("from_", str), ("source", str), ("dry_run", str), ("verbose", str)])):
     PREFIX_YAML = "PLUGIN_"
     PREFIX_ENCRYPTED = "TRIGGER_"
     DRONE_API = "DRONE_API"
@@ -16,11 +16,15 @@ class Config(NamedTuple("Config",
     FROM = "FROM"
     SOURCE = "DRONE_REPO"
     DRY_RUN = "DRY_RUN"
+    VERBOSE = "VERBOSE"
 
     @classmethod
     def create_from_env(cls) -> "Config":
         def get_either_from_yaml_or_from_secret_store(option: str) -> str:
             return os.getenv(Config.PREFIX_YAML + option, os.getenv(Config.PREFIX_ENCRYPTED + option))
+
+        def option_as_bool(option: str) -> bool:
+            return bool(option) and option.lower() in ("true", "yes")
 
         drone_api = get_either_from_yaml_or_from_secret_store(Config.DRONE_API)
         drone_token = get_either_from_yaml_or_from_secret_store(Config.DRONE_TOKEN)
@@ -28,9 +32,10 @@ class Config(NamedTuple("Config",
         gogs_token = get_either_from_yaml_or_from_secret_store(Config.GOGS_TOKEN)
         from_ = get_either_from_yaml_or_from_secret_store(Config.FROM)
         source = os.getenv(Config.SOURCE)
-        dry_run = str(get_either_from_yaml_or_from_secret_store(Config.DRY_RUN)).lower() in ("true", "yes")
+        dry_run = option_as_bool(get_either_from_yaml_or_from_secret_store(Config.DRY_RUN))
+        verbose = option_as_bool(get_either_from_yaml_or_from_secret_store(Config.VERBOSE))
 
-        return cls(drone_api, drone_token, gogs_api, gogs_token, from_, source, dry_run)
+        return cls(drone_api, drone_token, gogs_api, gogs_token, from_, source, dry_run, verbose)
 
 
 def validate(config: Config) -> None:

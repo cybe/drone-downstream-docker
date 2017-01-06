@@ -13,7 +13,6 @@ class Requester(object):
         headers = headers or {}
         content = self.request(url, headers, data, "application/json")
         doc = json.loads(content)
-        l.debug("Response for %s:\n%s", url, json.dumps(doc, sort_keys=True, indent=4))
         return doc
 
     @staticmethod
