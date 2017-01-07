@@ -7,7 +7,7 @@ from drone import DroneClient, BuildTrigger
 from gogs import GogsClient, DockerImageSearcher
 from repository import Repo
 from remote import ClientException, Requester
-from typing import Union, Dict, Iterable
+from typing import Union, Dict
 
 # types
 from repository import Repos, BranchesOfRepos, Branches

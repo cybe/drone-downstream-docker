@@ -23,11 +23,13 @@ class DroneClient(Client):
             },
             "name": "{name}"
         },
-        "commits": [{}],
+        "commits": [{
+            "message": "Triggered by upstream build of {source}"
+        }],
         "after": "{commit}",
         "sender": {
             "avatar_url": "static/drone.svg",
-            "username": "Triggered by upstream build of {source}. No one"
+            "username": "drone"
         }
     }
 
