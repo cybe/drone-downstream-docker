@@ -1,4 +1,4 @@
-FROM python:3.5-alpine
+FROM cybe/ps-python:alpine35
 
 COPY plugin /plugin
 
