@@ -1,4 +1,3 @@
-import logging as l
 import json
 import urllib.request
 import urllib.parse
