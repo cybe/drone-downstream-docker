@@ -58,7 +58,7 @@ def validate(config: Config) -> None:
 
 def validate_value(value: str, option: str, mandatory: bool = False, additional_message: str = "") -> None:
     if not value:
-        message = "{{}} value for {option} is missing. You {{}} declare it either in .drone.yaml " \
+        message = "{{}} value for {option} is missing. You {{}} declare it either in .drone.yml " \
                   "via '{option}: some_value' or as encrypted secret '{secret}'. {addition}" \
             .format(option=option.lower(), secret=Config.PREFIX_ENCRYPTED + option, addition=additional_message)
         if mandatory:
