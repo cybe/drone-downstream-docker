@@ -21,7 +21,7 @@ class TriggerPlugin(object):
         self.searcher = searcher
 
     def run(self, from_: str, source: Repo, dry_run: bool) -> None:
-        l.info("Triggering builds of Docker repositories with FROM instruction '%s'", from_)
+        l.info("Triggering builds of Docker repositories with FROM instruction '%s'.", from_)
 
         repos = self.drone.retrieve_repos()
         branches_of_repos = self.get_branches_of_repos(repos)
@@ -93,12 +93,12 @@ class TriggerPlugin(object):
 
     @staticmethod
     def log_builds_triggered(builds_triggered: int) -> None:
-        l.debug("Triggered %s builds in total", builds_triggered)
+        l.debug("Triggered %s builds in total.", builds_triggered)
 
 
-def verbose(function, *args, **kwargs):
+def verbose(func, *args, **kwargs):
     if l.getLogger().isEnabledFor(l.DEBUG):
-        function(*args, **kwargs)
+        func(*args, **kwargs)
 
 
 def list_repos_with_branches(repos: Dict[Repo, Union[Branches, BuildTrigger]]) -> str:

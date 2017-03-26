@@ -41,7 +41,7 @@ class DroneClient(Client):
     def retrieve_repos(self) -> Repos:
         try:
             doc = self.request_json("/user/repos")
-            return [Repo(r["owner"], r["name"]) for r in doc]
+            return [Repo(r["owner"], r["name"]) for r in doc] if doc else []
         except ClientException as e:
             l.error("Unable to retrieve Drone repositories: %s", e)
             raise SystemExit(1)
